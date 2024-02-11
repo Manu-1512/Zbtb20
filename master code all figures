@@ -1,0 +1,85 @@
+### Zbtb20
+# Author Manu Singh
+#date 02.02.2024
+
+
+library(Seurat)
+options(Seurat.object.assay.version = 'v5')
+pbmc <- readRDS("~/Dropbox/Ongoing/harmony_normalized_all_data_EPO.rds")
+levels(pbmc)
+levels(pbmc)
+new.cluster.ids <- c(rep("OPC", 2), "Pyr_Newly_formed_MM", rep("OPC_Intermediate", 2), rep("Oligodendrocyte", 2), rep("Oligo_Intermediate", 2), "Microglia", "Intermediate_Pyr_DG", #11 
+                      "DG", "Interneurons", rep("Pyr_mature_CA1_D", 2), "Pyr_CA2", "Pyr_Newly_formed_MM", "Pyr_Newly_formed", rep("Pyr_CA1_SV", 2), "Pyr_CA2", "Pyr_CA3", #22
+                      rep("Astrocytes", 2), "Microglia", "Endothelial", "Pericyte", "ependymal", "Cd274_Neuroimmune")
+ 
+ names(new.cluster.ids) <- levels(pbmc)
+ pbmc <- RenameIdents(pbmc, new.cluster.ids)
+ levels(pbmc)
+my_level <- c("OPC", "OPC_Intermediate", "Oligo_Intermediate", "Oligodendrocyte", "DG", "Intermediate_Pyr_DG", "Pyr_Newly_formed", "Pyr_Newly_formed_MM", "Pyr_mature_CA1_D", "Pyr_CA1_SV",
+                "Pyr_CA2", "Pyr_CA3", "Interneurons", "Microglia",  "Astrocytes", "Endothelial","Pericyte","ependymal", "Cd274_Neuroimmune")    
+my_level
+levels(pbmc) <- my_level
+ levels(pbmc)
+unique(Idents(pbmc))
+pbmc@meta.data$ident <- Idents(pbmc)
+library(cowplot)
+library(patchwork)
+library(RColorBrewer)
+library(ggplot2)
+my_col <- c("orange", "darkorange", "hotpink4",  "darkorchid", "darkcyan",  "forestgreen", "gold",
+              "lightpink3", "red2", "deeppink3", 
+            "navyblue",  "turquoise", "blue", "black", "slategrey", 
+            "coral3", "slateblue", "plum", "khaki4")
+png("Harmonised_Martin_lineages_UMAP_V2_recheck.png",  width = 42.8, height = 22.8, units = "cm", res = 600, pointsize = 12)
+ DimPlot(pbmc, raster=F, reduction="umap", cols= my_col, pt.size=0.5)
+dev.off()
+library(scales)
+library(viridis)
+library(Matrix)
+library("Nebulosa")
+library(scales)
+library(viridis)
+library(Matrix)
+library("Nebulosa")
+png("Nebulosa_ZBTB20_V2_recheck.png",  width = 22.8, height = 18.8, units = "cm", res = 600, pointsize = 12)
+plot_density(pbmc, "Zbtb20",reduction="umap",  pal=rev("plasma"))
+dev.off()
+
+png("Raw_ZBTB20_expression.png",  width = 38.8, height = 18.8, units = "cm", res = 600, pointsize = 12)
+VlnPlot(pbmc, c("Zbtb20"),  col=my_col, raster=F, pt.size=0) 
+dev.off()
+
+samples <- pbmc@meta.data$type
+samples[which(samples=="A_Samples")] <- "rhEPO"
+pbmc@meta.data$type <- samples
+png("ViolinPlot_DEG_ZBTB20_EPO_PLO_celltypewise_V4.png",  width = 38.7, height = 18.8, units = "cm", res = 600, pointsize = 12)
+VlnPlot(pbmc, c("Zbtb20"),  col=c("grey90", "red3"), split.by="type", split.plot=TRUE, pt.size=0) 
+dev.off()
+
+
+
+
+library(ComplexHeatmap)
+library(circlize)
+library(colorspace)
+library(GetoptLong)
+mat <- as.matrix(chip)
+head(mat)
+mat <- -log10(mat)
+head(mat)
+tail(mat)
+ha_mix_top = HeatmapAnnotation(violin = anno_density(mat, type = "violin", gp = gpar(fill = rep("grey", 93))))  
+
+png("Heatmap_HIF1A_binding_Umut.png",  width = 16.7, height = 22.8, units = "cm", res = 300, pointsize = 12)
+ Heatmap(mat, name = "-log10 Enrichment", col = colorRamp2(c(0, 1, 2, 3.1), c("midnightblue", "white", "red","darkred")), na_col = "grey", cluster_columns=F, row_names_gp = gpar(fontsize = 0.7), km = 3, gap = unit(1, "mm"),  top_annotation = ha_mix_top)
+dev.off()
+
+sel <- mat[apply(mat, 1, function(row){any(row > 2)}),]
+
+ha_mix_top = HeatmapAnnotation(violin = anno_density(sel, type = "violin", gp = gpar(fill = rep("grey", 93))))  
+png("Heatmap_HIF1A_binding_significant_Umut.png",  width = 16.7, height = 22.8, units = "cm", res = 300, pointsize = 12)
+ Heatmap(sel, name = "-log10 Enrichment", col = colorRamp2(c(0, 1, 2, 3.1), c("midnightblue", "white", "red","darkred")), na_col = "grey", cluster_columns=F, row_names_gp = gpar(fontsize = 5), km = 3, gap = unit(1, "mm"),  top_annotation = ha_mix_top)
+dev.off()
+png("Heatmap_HIF1A_binding_significant_Umut.png",  width = 16.7, height = 22.8, units = "cm", res = 300, pointsize = 12)
+ Heatmap(sel, name = "-log10 Enrichment", col = colorRamp2(c(0, 1, 2, 3.1), c("midnightblue", "white", "red","darkred")), na_col = "grey", cluster_columns=F, row_names_gp = gpar(fontsize = 5), km = 2, gap = unit(1, "mm"),  top_annotation = ha_mix_top)
+dev.off()
