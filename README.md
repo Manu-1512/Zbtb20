@@ -1,0 +1,1 @@
+To begin examining the Zbtb20 expression in the mouse hippocampus, we leveraged the recently published single nuclei RNA-seq dataset encompassing a broad range of neuronal and non-neuronal lineages (PMID: 37604818). Next, we asked whether rhEPO treatment affects the Zbtb20 expression pattern in any or many of the aforementioned lineages. 
